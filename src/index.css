@@ -1,0 +1,168 @@
+@import "tailwindcss";
+
+/* ---- Halden Miller design system --------------------------------------- */
+:root {
+  /* Raw brand tokens (flip in dark) */
+  --color-midnight-ink: #191818;
+  --color-parchment-cream: #f7f7f2;
+  --color-pressed-linen: #efede7;
+  --color-weathered-stone: #e1dcd5;
+  --color-obsidian-shade: #1e1c1b;
+  --color-deep-walnut: #22201f;
+  --color-fern-success: #2ad87f;
+  --color-kiln-amber: #c56a21;
+  --color-ember-red: #c94040;
+
+  /* Semantic tokens derived from raw (auto-flip via the raw overrides) */
+  --canvas: var(--color-parchment-cream);
+  --surface: var(--color-pressed-linen);
+  --surface-sunk: var(--color-weathered-stone);
+  --ink: var(--color-midnight-ink);
+  --accent: var(--color-midnight-ink);
+  --on-accent: var(--color-parchment-cream);
+  --accent-soft: var(--color-pressed-linen);
+  --ring: var(--color-midnight-ink);
+  --ok: var(--color-fern-success);
+
+  /* Semantic tokens set per theme */
+  --ink-soft: #46443f;
+  --muted: #78736c;
+  --border: #e3ded7;
+  --border-strong: #d3ccc2;
+  --accent-ink: #46443f;
+
+  --btn-bevel: 0 -1px 0 0 rgba(247, 247, 242, 0.16),
+    0 1px 0 0 rgba(247, 247, 242, 0.08);
+  --shadow: 0 1px 0 0 var(--border);
+}
+
+[data-theme="dark"] {
+  --color-midnight-ink: #f7f7f2;
+  --color-parchment-cream: #191818;
+  --color-pressed-linen: #1e1c1b;
+  --color-weathered-stone: #22201f;
+
+  --ink-soft: #c6c2ba;
+  --muted: #908b83;
+  --border: #2c2a28;
+  --border-strong: #3a3835;
+  --accent-ink: #c6c2ba;
+}
+
+@theme inline {
+  --color-canvas: var(--canvas);
+  --color-surface: var(--surface);
+  --color-surface-sunk: var(--surface-sunk);
+  --color-ink: var(--ink);
+  --color-ink-soft: var(--ink-soft);
+  --color-muted: var(--muted);
+  --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
+  --color-accent: var(--accent);
+  --color-on-accent: var(--on-accent);
+  --color-accent-soft: var(--accent-soft);
+  --color-accent-ink: var(--accent-ink);
+  --color-ok: var(--ok);
+  --color-amber: var(--color-kiln-amber);
+  --font-display: "IBM Plex Serif", Georgia, serif;
+  --font-serif: "IBM Plex Serif", Georgia, serif;
+  --font-sans: "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+}
+
+/* Monospace uppercase eyebrow label */
+.eyebrow {
+  font-family: var(--font-mono);
+  text-transform: uppercase;
+  letter-spacing: 0.75px;
+  font-size: 0.72rem;
+  line-height: 1.33;
+  font-weight: 400;
+  color: var(--muted);
+}
+
+html {
+  color-scheme: light;
+}
+[data-theme="dark"] {
+  color-scheme: dark;
+}
+
+body {
+  margin: 0;
+  background-color: var(--canvas);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* Calm, fast motion only */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    transition-duration: 0.001ms !important;
+  }
+}
+
+::selection {
+  background: var(--accent-soft);
+  color: var(--accent-ink);
+}
+
+/* Visible focus everywhere */
+:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+.fade-in {
+  animation: fade-in 0.32s ease both;
+}
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Auto-growing textarea surface */
+.grow-wrap {
+  display: grid;
+}
+.grow-wrap::after {
+  content: attr(data-replicated-value) " ";
+  white-space: pre-wrap;
+  word-break: break-word;
+  visibility: hidden;
+}
+.grow-wrap > textarea {
+  resize: none;
+  overflow: hidden;
+}
+.grow-wrap > textarea,
+.grow-wrap::after {
+  grid-area: 1 / 1 / 2 / 2;
+  font: inherit;
+  line-height: 1.6;
+  padding: 0.85rem 1rem;
+}
+
+/* ---- Print / PDF layout ------------------------------------------------- */
+.pdf-page {
+  background: #f7f7f2;
+  color: #191818;
+  font-family: "IBM Plex Sans", Arial, sans-serif;
+}
+.pdf-page h1,
+.pdf-page h2,
+.pdf-page h3 {
+  font-family: "IBM Plex Serif", Georgia, serif;
+}
