@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import type { Phase } from "./types";
 import { newCycle, useAppState } from "./storage";
-import { SavedIndicator, ThemeToggle } from "./components/ui";
+import { generateCode, syncConfigured, useCloudSync } from "./sync";
+import { SavedIndicator, SyncBadge, ThemeToggle } from "./components/ui";
 import { Setup } from "./screens/Setup";
 import { Prep } from "./screens/Prep";
 import { Meeting } from "./screens/Meeting";
@@ -29,6 +30,8 @@ export default function App() {
     openCycle,
   } = useAppState();
 
+  const syncState = useCloudSync(current, updateCurrent);
+
   const [theme, setTheme] = useState<Theme>(initialTheme);
   useEffect(() => {
     document.documentElement.setAttribute("data-theme", theme);
@@ -48,6 +51,7 @@ export default function App() {
     partner2: string;
     year: string;
     meetingDate: string;
+    code?: string;
   }) => {
     if (current && current.meta.status === "setup") {
       updateCurrent((c) => ({
@@ -55,7 +59,7 @@ export default function App() {
         meta: { ...c.meta, ...v, status: "prep" },
       }));
     } else {
-      const c = newCycle(v.partner1, v.partner2, v.year, v.meetingDate);
+      const c = newCycle(v.partner1, v.partner2, v.year, v.meetingDate, v.code);
       c.meta.status = "prep";
       startCycle(c);
     }
@@ -63,7 +67,7 @@ export default function App() {
   };
 
   const goNewYear = () => {
-    startNewYear();
+    startNewYear(syncConfigured() ? generateCode() : undefined);
     setView("prep");
   };
 
@@ -93,6 +97,9 @@ export default function App() {
             </span>
           </button>
           <div className="flex items-center gap-3">
+            {syncState !== "off" && current?.meta.code && (
+              <SyncBadge state={syncState} code={current.meta.code} />
+            )}
             <SavedIndicator status={saveStatus} />
             <ThemeToggle
               theme={theme}
@@ -185,7 +192,9 @@ export default function App() {
       </main>
 
       <footer className="mx-auto max-w-[52rem] px-6 py-10 text-center text-[0.78rem] text-muted">
-        Stays on this device. No accounts, no tracking.
+        {syncConfigured()
+          ? "Saved on this device and synced privately by meeting code. No accounts, no tracking."
+          : "Stays on this device. No accounts, no tracking."}
       </footer>
     </div>
   );

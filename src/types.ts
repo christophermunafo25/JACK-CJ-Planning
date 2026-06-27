@@ -34,6 +34,8 @@ export type Cycle = {
     meetingDate: string;
     createdAt: string;
     status: CycleStatus;
+    /** Shared sync code; only set when cloud sync is used. */
+    code?: string;
   };
   prep: {
     partner1: PrepAnswers;

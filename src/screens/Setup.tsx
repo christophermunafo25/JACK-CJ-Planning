@@ -1,6 +1,7 @@
 import { useState } from "react";
 import type { Cycle } from "../types";
 import { Button, PrivacyNote } from "../components/ui";
+import { generateCode, normalizeCode, syncConfigured } from "../sync";
 
 const field =
   "w-full rounded-[8px] border border-border bg-surface px-4 py-3 text-[1.0625rem] text-ink " +
@@ -18,15 +19,18 @@ export function Setup({
     partner2: string;
     year: string;
     meetingDate: string;
+    code?: string;
   }) => void;
   archive: Cycle[];
   onOpen: (id: string) => void;
 }) {
+  const cloud = syncConfigured();
   const thisYear = String(new Date().getFullYear());
   const [partner1, setP1] = useState("");
   const [partner2, setP2] = useState("");
   const [year, setYear] = useState(thisYear);
   const [meetingDate, setDate] = useState("");
+  const [code, setCode] = useState(() => (cloud ? generateCode() : ""));
   const ready = partner1.trim() && partner2.trim() && year.trim();
 
   return (
@@ -44,7 +48,14 @@ export function Setup({
       <form
         onSubmit={(e) => {
           e.preventDefault();
-          if (ready) onCreate({ partner1, partner2, year, meetingDate });
+          if (ready)
+            onCreate({
+              partner1,
+              partner2,
+              year,
+              meetingDate,
+              code: cloud ? code || undefined : undefined,
+            });
         }}
         className="space-y-6"
       >
@@ -102,6 +113,34 @@ export function Setup({
             />
           </div>
         </div>
+
+        {cloud && (
+          <div className="rounded-[12px] bg-surface-sunk p-6">
+            <label htmlFor="code" className={labelCls}>
+              Meeting code
+            </label>
+            <div className="flex items-center gap-2">
+              <input
+                id="code"
+                className={`${field} font-mono tracking-[0.18em] uppercase`}
+                value={code}
+                onChange={(e) => setCode(normalizeCode(e.target.value))}
+                placeholder="ABC123"
+                autoComplete="off"
+                spellCheck={false}
+                maxLength={6}
+              />
+              <Button variant="ghost" onClick={() => setCode(generateCode())}>
+                New code
+              </Button>
+            </div>
+            <p className="mt-3 text-[0.85rem] leading-relaxed text-muted">
+              Share this code with your partner so you both land in the same plan
+              on your own devices. To join a plan your partner already started,
+              type their code in here instead.
+            </p>
+          </div>
+        )}
 
         <div className="pt-2">
           <Button type="submit" disabled={!ready}>

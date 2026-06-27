@@ -18,7 +18,8 @@ export function newCycle(
   partner1 = "",
   partner2 = "",
   year = String(new Date().getFullYear()),
-  meetingDate = ""
+  meetingDate = "",
+  code?: string
 ): Cycle {
   return {
     id: makeId(),
@@ -29,6 +30,7 @@ export function newCycle(
       meetingDate,
       createdAt: new Date().toISOString(),
       status: "setup",
+      code,
     },
     prep: {
       partner1: { ...EMPTY_PREP },
@@ -119,14 +121,15 @@ export function useAppState() {
   }, []);
 
   /** Archive the current cycle and begin a fresh one, carrying names forward. */
-  const startNewYear = useCallback(() => {
+  const startNewYear = useCallback((code?: string) => {
     setState((s) => {
       const cur = s.cycles.find((c) => c.id === s.currentId);
       const fresh = newCycle(
         cur?.meta.partner1 ?? "",
         cur?.meta.partner2 ?? "",
         String(Number(cur?.meta.year ?? new Date().getFullYear()) + 1),
-        ""
+        "",
+        code
       );
       return {
         ...s,

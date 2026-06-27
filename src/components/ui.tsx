@@ -1,5 +1,6 @@
-import { type ReactNode, type TextareaHTMLAttributes } from "react";
+import { type ReactNode, type TextareaHTMLAttributes, useState } from "react";
 import type { SaveStatus } from "../storage";
+import { syncConfigured, type SyncState } from "../sync";
 
 /* ---- Auto-growing textarea --------------------------------------------- */
 type AutoTextareaProps = TextareaHTMLAttributes<HTMLTextAreaElement> & {
@@ -91,6 +92,45 @@ export function Button({
   );
 }
 
+/* ---- Sync badge: shows the meeting code and link status ----------------- */
+export function SyncBadge({ state, code }: { state: SyncState; code: string }) {
+  const [copied, setCopied] = useState(false);
+  const dot =
+    state === "synced" ? "var(--ok)" : state === "offline" ? "var(--color-amber)" : "var(--muted)";
+  const title =
+    state === "synced"
+      ? "Synced. Tap to copy your code."
+      : state === "offline"
+      ? "Offline, saved on this device. Will sync when you reconnect."
+      : "Connecting…";
+
+  const copy = async () => {
+    try {
+      await navigator.clipboard.writeText(code);
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 1400);
+    } catch {
+      /* clipboard blocked; ignore */
+    }
+  };
+
+  return (
+    <button
+      onClick={copy}
+      title={title}
+      aria-label={`Meeting code ${code}. ${title}`}
+      className="eyebrow inline-flex items-center gap-1.5 rounded-[16px] bg-surface px-2.5 py-1.5 hover:bg-surface-sunk transition-colors"
+    >
+      <span
+        className="inline-block h-1.5 w-1.5 rounded-full"
+        style={{ backgroundColor: dot }}
+        aria-hidden
+      />
+      {copied ? "Copied" : code}
+    </button>
+  );
+}
+
 /* ---- Theme toggle ------------------------------------------------------- */
 export function ThemeToggle({
   theme,
@@ -131,8 +171,19 @@ export function ThemeToggle({
 
 /* ---- Misc --------------------------------------------------------------- */
 export function PrivacyNote({ className = "" }: { className?: string }) {
+  const cls = "text-[0.82rem] leading-relaxed text-muted " + className;
+  if (syncConfigured()) {
+    return (
+      <p className={cls}>
+        Your plan saves on this device and syncs privately to your own Supabase
+        project using your meeting code. Anyone with the code can open the plan,
+        so share it only with each other. No accounts and no tracking. Download a
+        copy once you finish so you always have your own.
+      </p>
+    );
+  }
   return (
-    <p className={"text-[0.82rem] leading-relaxed text-muted " + className}>
+    <p className={cls}>
       Everything you write stays on this device, in this browser. No accounts, no
       cloud, no tracking. Clearing your browser data clears this too, so download
       a copy once you finish.
